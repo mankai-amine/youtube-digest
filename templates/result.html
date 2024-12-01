@@ -1,6 +1,44 @@
-<html>
-<body>
-    <h2>Video Captions</h2>
-    <p>{{ captions }}</p>  
-</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Captions and Summary</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+    <body>
+
+        <div class="container">
+            <div class="header">
+                <h1>Video Captions and Summary</h1>
+            </div>
+    
+            <div class="content">
+                <div class="summary">
+                    <h2>Summary</h2>
+                    <p>{{ summary }}</p>
+                </div>
+                <div class="captions">
+                    <h2>Video Captions</h2>
+                    <button id="toggleButton" class="show-captions-button" onclick="toggleCaptions()">Show Captions</button>
+                    <p id="captions">{{ captions }}</p>
+                </div>
+            </div>
+        </div>
+    
+    </body>
+    <script>
+        function toggleCaptions() {
+            var captions = document.getElementById("captions");
+            var button = document.getElementById("toggleButton");
+
+            if (captions.style.display === "none") {
+                captions.style.display = "block";
+                button.textContent = "Hide Captions";
+            } else {
+                captions.style.display = "none";
+                button.textContent = "Show Captions";
+            }
+        }
+    </script>
 </html>
