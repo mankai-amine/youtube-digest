@@ -4,6 +4,9 @@ from youtube_transcript_api._errors import TranscriptsDisabled, VideoUnavailable
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from models import Favorite
 
 
 
@@ -14,6 +17,13 @@ load_dotenv()
 
 # Set your OpenAI API key
 client = OpenAI(api_key=os.getenv("API_KEY"))
+
+# MySQL configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+mysqlconnector://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize the database
+db = SQLAlchemy(app)
 
 
 
