@@ -1,4 +1,4 @@
-from . import db  # Import db object from app.py 
+from database import db
 
 class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
