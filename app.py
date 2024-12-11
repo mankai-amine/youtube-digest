@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, VideoUnavailable
 from openai import OpenAI
@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 #from flask_sqlalchemy import SQLAlchemy
 from database import db
 from models import Favorite
+
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -88,9 +90,25 @@ def summarize():
         summarized_text = summarize_text(captions)
 
         # Display the summarized text
-        return render_template('result.html', captions=captions, summary = summarized_text)
+        return render_template('result.html', captions=captions, summary = summarized_text, video_url= youtube_url )
     except ValueError as e:
         return f"An error occurred: {e}"
+
+@app.route('/save-video', methods=['POST'])
+def save_video():
+    data = request.json
+    video_url = data.get('video_url')
+    summary = data.get('summary')
+
+    if not video_url or not summary:
+        return jsonify({"error": "Video URL and summary are required"}), 400
+
+    # Add to database
+    new_favorite = Favorite(video_url=video_url, summary=summary)
+    db.session.add(new_favorite)
+    db.session.commit()
+
+    return jsonify({"message": "Video saved successfully"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
