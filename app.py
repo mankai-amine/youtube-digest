@@ -110,5 +110,21 @@ def save_video():
 
     return jsonify({"message": "Video saved successfully"}), 200
 
+@app.route('/favorites')
+def favorites():
+    favorites = Favorite.query.all()  
+    return render_template('favorites.html', favorites=favorites)
+
+@app.route('/delete/<int:video_id>', methods=['DELETE'])
+def delete_video(video_id):
+    video = Favorite.query.get(video_id)
+    if video:
+        db.session.delete(video)
+        db.session.commit()
+        return jsonify({"message": "Video deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Video not found"}), 404
+
+
 if __name__ == '__main__':
     app.run(debug=True)

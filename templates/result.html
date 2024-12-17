@@ -1,70 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Captions and Summary</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-    <body>
+{% extends "base.html" %}
 
-        <div class="container">
-            <div class="header">
-                <h1>Video Captions and Summary</h1>
-            </div>
-    
-            <div class="content">
-                <div class="summary">
-                    <h2>Summary</h2>
-                    <p>{{ summary }}</p>
-                </div>
-                <div class="captions">
-                    <h2>Video Captions</h2>
-                    <button id="toggleButton" class="show-captions-button" onclick="toggleCaptions()">Show Captions</button>
-                    <p id="captions">{{ captions }}</p>
-                </div>
-                <div class="save">
-                    <button id="saveButton" 
-                        data-video-url="{{ video_url }}" 
-                        data-summary="{{ summary }}"
-                        onclick="saveVideo(this)"
-                    >Save Video
-                    </button>
-                </div>
-            </div>
+{% block title %}Summary{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="header">
+        <h1>Video Captions and Summary</h1>
+    </div>
+
+    <div class="content">
+        <div class="summary">
+            <h2>Summary</h2>
+            <p>{{ summary }}</p>
         </div>
-    
-    </body>
-    <script>
-        function toggleCaptions() {
-            var captions = document.getElementById("captions");
-            var button = document.getElementById("toggleButton");
+        <div class="captions">
+            <h2>Video Captions</h2>
+            <button id="toggleButton" class="show-captions-button" onclick="toggleCaptions()">Show Captions</button>
+            <p id="captions">{{ captions }}</p>
+        </div>
+        <div class="save">
+            <button id="saveButton" 
+                data-video-url="{{ video_url }}" 
+                data-summary="{{ summary }}"
+                onclick="saveVideo(this)"
+            >Save Video
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-            if (captions.style.display === "none") {
-                captions.style.display = "block";
-                button.textContent = "Hide Captions";
-            } else {
-                captions.style.display = "none";
-                button.textContent = "Show Captions";
-            }
+{% block scripts %}
+<script>
+    function toggleCaptions() {
+        var captions = document.getElementById("captions");
+        var button = document.getElementById("toggleButton");
+
+        if (captions.style.display === "none") {
+            captions.style.display = "block";
+            button.textContent = "Hide Captions";
+        } else {
+            captions.style.display = "none";
+            button.textContent = "Show Captions";
         }
+    }
 
-        function saveVideo(button) {
-            const video_url = button.getAttribute('data-video-url');
-            const summary = button.getAttribute('data-summary');
+    function saveVideo(button) {
+        const video_url = button.getAttribute('data-video-url');
+        const summary = button.getAttribute('data-summary');
 
-            fetch('/save-video', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ video_url: video_url, summary: summary })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("Failed to save video.");
-                alert("Video saved successfully!");
-            })
-            .catch(error => alert("An error occurred: " + error.message));
-        }
-    </script>
-</html>
+        fetch('/save-video', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ video_url: video_url, summary: summary })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Failed to save video.");
+            alert("Video saved successfully!");
+        })
+        .catch(error => alert("An error occurred: " + error.message));
+    }
+</script>
+{% endblock %}
