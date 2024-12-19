@@ -33,53 +33,60 @@ with app.app_context():
 
 
 
+import yt_dlp
+from youtube_transcript_api import YouTubeTranscriptApi, YouTubeTranscriptApiException
+
 def fetch_captions(video_url):
     try:
+        # Define yt-dlp options
         ydl_opts = {
             'writesubtitles': True,
             'writeautomaticsub': True,
             'skip_download': True,
-            'cookiesfrombrowser': ('chrome',),  # Try to use Chrome cookies
+            'cookiesfrombrowser': ('chrome',),  
             'no_warnings': True,
             'quiet': True
         }
         
-        # Try without cookies first
+        # Attempt to fetch subtitles using yt-dlp
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                return get_transcript_with_original_api(video_url)
+                info_dict = ydl.extract_info(video_url, download=False)
+                if 'requested_subtitles' in info_dict:
+                    subtitle_url = info_dict['requested_subtitles'].get('en', {}).get('url')
+                    if subtitle_url:
+                        # Process and return the subtitle
+                        subtitle = ydl.urlopen(subtitle_url).read().decode('utf-8')
+                        return subtitle
         except Exception as e:
-            print(f"First attempt failed: {str(e)}")
-            
-            # Fall back to youtube-transcript-api with custom headers
-            return get_transcript_with_original_api(video_url)
+            print(f"yt-dlp failed: {str(e)}")
+
+        # Fallback to youtube-transcript-api if yt-dlp fails or subtitles are unavailable
+        return get_transcript_with_original_api(video_url)
 
     except Exception as e:
         print(f"Error fetching captions: {str(e)}")
         raise ValueError(f"Unable to fetch captions: {str(e)}")
 
 def get_transcript_with_original_api(video_url):
-    from youtube_transcript_api import YouTubeTranscriptApi
-    import requests
+    try:
+        # Extract video ID from URL
+        if 'v=' in video_url:
+            video_id = video_url.split('v=')[1].split('&')[0]
+        else:
+            video_id = video_url.split('/')[-1].split('&')[0]
+
+        # Try fetching transcript using youtube-transcript-api
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        return " ".join([item['text'] for item in transcript])
     
-    # Extract video ID
-    if 'v=' in video_url:
-        video_id = video_url.split('v=')[1].split('&')[0]
-    else:
-        video_id = video_url.split('/')[-1].split('&')[0]
-
-    # Add custom headers to mimic a browser
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Origin': 'https://www.youtube.com',
-        'Referer': 'https://www.youtube.com/'
-    }
-
-    # Try to get transcript with custom headers
-    transcript = YouTubeTranscriptApi.get_transcript(video_id, proxies={'http': None, 'https': None})
-    return " ".join([item['text'] for item in transcript])
+    except YouTubeTranscriptApiException as e:
+        # Handle specific exceptions for youtube-transcript-api
+        if e.error_code == 404:
+            return "Transcript not available for this video."
+        else:
+            print(f"Failed to fetch transcript: {str(e)}")
+            raise ValueError(f"Unable to fetch transcript: {str(e)}")
 
 
 
