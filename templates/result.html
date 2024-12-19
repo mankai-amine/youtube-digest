@@ -23,6 +23,7 @@
                 onclick="saveVideo(this)"
             >Save Video
             </button>
+            <p id="saveMessage" style="color: green; font-weight: bold; display: none;"></p>
         </div>
     </div>
 </div>
@@ -46,6 +47,7 @@
     function saveVideo(button) {
         const video_url = button.getAttribute('data-video-url');
         const summary = button.getAttribute('data-summary');
+        const message = document.getElementById("saveMessage");
 
         fetch('/save-video', {
             method: 'POST',
@@ -56,9 +58,15 @@
         })
         .then(response => {
             if (!response.ok) throw new Error("Failed to save video.");
-            alert("Video saved successfully!");
+            message.textContent = "Video saved successfully!";
+            message.style.display = "block";
         })
-        .catch(error => alert("An error occurred: " + error.message));
+        .catch(error => {
+            message.textContent = "An error occurred: " + error.message;
+            message.style.color = "red";
+            message.style.display = "block";
+        });
     }
 </script>
 {% endblock %}
+
