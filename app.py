@@ -34,6 +34,12 @@ with app.app_context():
 
 def fetch_captions(video_url):
     try:
+        print("Starting fetch_captions")  
+        from requests import get
+        print(f"My IP: {get('https://api.ipify.org').text}") 
+
+
+        print(f"Received URL: {video_url}")
         # Extract video ID from URL
         if 'v=' in video_url:
             video_id = video_url.split('v=')[-1]
@@ -44,6 +50,7 @@ def fetch_captions(video_url):
 
         # Get transcript
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        print("Successfully got transcript")
 
         # Combine transcript into a single string
         captions = " ".join([item['text'] for item in transcript])
