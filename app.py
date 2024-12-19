@@ -3,6 +3,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, VideoUnavailable
 from openai import OpenAI
 import os
+import yt_dlp
 from dotenv import load_dotenv
 #from flask_sqlalchemy import SQLAlchemy
 from database import db
@@ -34,27 +35,33 @@ with app.app_context():
 
 def fetch_captions(video_url):
     try:
-        if 'v=' in video_url:
-            video_id = video_url.split('v=')[1].split('&')[0]
-        elif 'youtu.be' in video_url:
-            video_id = video_url.split('/')[-1].split('&')[0]
-
-        print(f"Video ID: {video_id}")
+        ydl_opts = {
+            'writesubtitles': True,
+            'writeautomaticsub': True,
+            'skip_download': True,
+            'subtitlesformat': 'txt',
+        }
         
-        # Get list of available transcripts
-        try:
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-            print("Available transcripts:", transcript_list.get_available_transcripts())
-        except Exception as e:
-            print(f"Error listing transcripts: {type(e).__name__}: {str(e)}")
-
-        # Original code continues...
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        return " ".join([item['text'] for item in transcript])
-
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(video_url, download=False)
+            if 'subtitles' in info or 'automatic_captions' in info:
+                # Get either manual or auto-generated captions
+                subtitles = info.get('subtitles', {})
+                auto_caps = info.get('automatic_captions', {})
+                
+                # Try to get English captions
+                for captions in (subtitles, auto_caps):
+                    for lang in ['en', 'en-US', 'en-GB']:
+                        if lang in captions:
+                            return " ".join([entry.get('text', '') for entry in captions[lang]])
+                            
+                raise ValueError("No English captions found")
+            else:
+                raise ValueError("No captions available for this video")
+                
     except Exception as e:
-        print(f"Final error: {type(e).__name__}: {str(e)}")
-        raise
+        print(f"Error fetching captions: {str(e)}")
+        raise ValueError(f"Unable to fetch captions: {str(e)}")
 
 
 
