@@ -3,22 +3,23 @@
 {% block title %}Favorites{% endblock %}
 
 {% block content %}
-    <div class="container">
-        {% if favorites %}
-            <ul>
-                {% for favorite in favorites %}
-                    <li>
-                        <a href="{{ favorite.video_url }}" target="_blank">{{ favorite.video_url }}</a>
-                        <button id="button-{{ favorite.id }}" onclick="toggleSummary('{{ favorite.id }}')">Show Summary</button>
-                        <p id="summary-{{ favorite.id }}" style="display: none;">{{ favorite.summary }}</p>
-                        <button onclick="deleteVideo('{{ favorite.id }}')">Delete</button>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No favorite videos yet.</p>
-        {% endif %}
-    </div>
+<h1>My Favorite Videos</h1>
+<div class="container">
+    {% if favorites %}
+        <ul style="list-style-type: none">
+            {% for favorite in favorites %}
+                <li class="favorite-item">
+                    <a href="{{ favorite.video_url }}" target="_blank" style="margin-right: 2rem; text-decoration: none;">{{ favorite.video_url }}</a>
+                    <button class="custom-button" id="button-{{ favorite.id }}" onclick="toggleSummary('{{ favorite.id }}')">Show Summary</button>
+                    <p id="summary-{{ favorite.id }}" style="display: none;">{{ favorite.summary }}</p>
+                    <button class="custom-button" style="background-color: brown;" onclick="deleteVideo('{{ favorite.id }}')">Delete</button>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No favorite videos yet.</p>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block scripts %}

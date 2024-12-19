@@ -3,9 +3,14 @@
 {% block title %}YouTube Digest{% endblock %}
 
 {% block content %}
-<form action="/summarize" method="post">
-    <input type="text" name="youtube_url" placeholder="Enter YouTube video URL" required>
-    <button type="submit">Summarize</button>
+<section class="intro">
+    <h1>Welcome to YouTube Digest!</h1>
+    <p>Your AI-powered tool for summarizing and saving your favorite YouTube videos.</p>
+</section>
+
+<form action="/summary" method="post">
+    <input type="text" name="youtube_url" style="width: 50%;" placeholder="Enter YouTube video URL" required>
+    <button type="submit" class="custom-button">Summarize</button>
 </form>
 {% endblock %}
 

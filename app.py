@@ -80,7 +80,7 @@ def summarize_text(text):
 def home():
     return render_template('index.html')
 
-@app.route('/summarize', methods=['POST'])
+@app.route('/summary', methods=['POST'])
 def summarize():
     youtube_url = request.form['youtube_url']
     try:

@@ -5,15 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My App{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Common Header -->
-    <header>
-        <nav>
-            <button onclick="window.location.href='/'">Home</button>
-            <button onclick="window.location.href='/favorites'">Favorites</button>
+    <header style="margin-bottom: 2rem;">
+        <nav style="display: flex; justify-content: space-between; align-items: center;">
+            <!-- App Name -->
+             <div style="display: flex; align-items: center;">
+                <img src="/static/youtue.png" alt="logo" style="width:40px; height:auto; margin-right: 1rem; "/>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #333;">
+                    YouTube Digest
+                </div>
+             </div>
+            
+            <!-- Navigation Buttons -->
+            <nav>
+                <a href="/" class="nav-link">Home</a>
+                <a href="/favorites" class="nav-link">Favorites</a>
+            </nav>
         </nav>
     </header>
+
 
     <!-- Main Content -->
     <main>

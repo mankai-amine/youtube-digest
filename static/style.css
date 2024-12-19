@@ -1,7 +1,6 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     text-align: center;
-    padding: 20px;
 }
 input, button {
     margin: 10px;
@@ -35,9 +34,54 @@ p {
 
 .header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 50px;
+    padding: 10px;
 }
 
+nav {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.favorite-item {
+    margin-bottom: 1rem; 
+    padding: 10px; 
+    background-color: #f9f9f9; 
+    border-radius: 5px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color:black;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    font-family: 'Roboto', sans-serif;
+}
+
+.nav-link:hover {
+    background-color: #d88c8c; 
+}
+.nav-link:active {
+    background-color: #d88c8c; 
+}
+
+.intro {
+    text-align: center;
+    padding: 2rem;
+}
+
+.intro h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+.intro p {
+    font-size: 1.2rem;
+    color: #555;
+    box-shadow: none;
+}
 .content {
     margin-bottom: 40px;
 }
@@ -51,7 +95,7 @@ p {
     display: none;
 }
 
-.show-captions-button {
+.custom-button {
     background-color: #3498db;
     color: white;
     padding: 10px 20px;
@@ -61,6 +105,7 @@ p {
     font-size: 16px;
 }
 
-.show-captions-button:hover {
+.custom-button:hover {
     background-color: #2980b9;
 }
+

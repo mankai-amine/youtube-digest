@@ -5,22 +5,19 @@
 {% block content %}
 
 <div class="container">
-    <div class="header">
-        <h1>Video Captions and Summary</h1>
-    </div>
-
     <div class="content">
         <div class="summary">
-            <h2>Summary</h2>
+            <h2>Video Summary</h2>
             <p>{{ summary }}</p>
         </div>
         <div class="captions">
             <h2>Video Captions</h2>
-            <button id="toggleButton" class="show-captions-button" onclick="toggleCaptions()">Show Captions</button>
+            <button id="toggleButton" class="custom-button" onclick="toggleCaptions()">Show Captions</button>
             <p id="captions">{{ captions }}</p>
         </div>
         <div class="save">
             <button id="saveButton" 
+                class="custom-button" style="background-color: green;"
                 data-video-url="{{ video_url }}" 
                 data-summary="{{ summary }}"
                 onclick="saveVideo(this)"
