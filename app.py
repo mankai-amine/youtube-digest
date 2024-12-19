@@ -39,29 +39,47 @@ def fetch_captions(video_url):
             'writesubtitles': True,
             'writeautomaticsub': True,
             'skip_download': True,
-            'subtitlesformat': 'txt',
+            'cookiesfrombrowser': ('chrome',),  # Try to use Chrome cookies
+            'no_warnings': True,
+            'quiet': True
         }
         
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(video_url, download=False)
-            if 'subtitles' in info or 'automatic_captions' in info:
-                # Get either manual or auto-generated captions
-                subtitles = info.get('subtitles', {})
-                auto_caps = info.get('automatic_captions', {})
-                
-                # Try to get English captions
-                for captions in (subtitles, auto_caps):
-                    for lang in ['en', 'en-US', 'en-GB']:
-                        if lang in captions:
-                            return " ".join([entry.get('text', '') for entry in captions[lang]])
-                            
-                raise ValueError("No English captions found")
-            else:
-                raise ValueError("No captions available for this video")
-                
+        # Try without cookies first
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                return get_transcript_with_original_api(video_url)
+        except Exception as e:
+            print(f"First attempt failed: {str(e)}")
+            
+            # Fall back to youtube-transcript-api with custom headers
+            return get_transcript_with_original_api(video_url)
+
     except Exception as e:
         print(f"Error fetching captions: {str(e)}")
         raise ValueError(f"Unable to fetch captions: {str(e)}")
+
+def get_transcript_with_original_api(video_url):
+    from youtube_transcript_api import YouTubeTranscriptApi
+    import requests
+    
+    # Extract video ID
+    if 'v=' in video_url:
+        video_id = video_url.split('v=')[1].split('&')[0]
+    else:
+        video_id = video_url.split('/')[-1].split('&')[0]
+
+    # Add custom headers to mimic a browser
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Origin': 'https://www.youtube.com',
+        'Referer': 'https://www.youtube.com/'
+    }
+
+    # Try to get transcript with custom headers
+    transcript = YouTubeTranscriptApi.get_transcript(video_id, proxies={'http': None, 'https': None})
+    return " ".join([item['text'] for item in transcript])
 
 
 
