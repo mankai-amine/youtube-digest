@@ -43,23 +43,7 @@ def fetch_captions(video_url):
         else:
             return "Invalid YouTube URL"
 
-        # Set custom headers to mimic a real browser request
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Origin': 'https://www.youtube.com',
-            'Referer': 'https://www.youtube.com/'
-        }
-
-        # Add headers to the API request (using requests library)
-        response = requests.get(f'https://www.youtube.com/watch?v={video_id}', headers=headers)
-        
-        # Check if the response is successful and contains valid data
-        if response.status_code != 200:
-            raise ValueError(f"Failed to access video. Status code: {response.status_code}")
-
-        # Get transcript using youtube-transcript-api
+        # Get transcript
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         print("Successfully got transcript")
 
