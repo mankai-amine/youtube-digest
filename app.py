@@ -34,33 +34,27 @@ with app.app_context():
 
 def fetch_captions(video_url):
     try:
-        print("Starting fetch_captions")  
-        from requests import get
-        print(f"My IP: {get('https://api.ipify.org').text}") 
-
-
-        print(f"Received URL: {video_url}")
-        # Extract video ID from URL
         if 'v=' in video_url:
-            video_id = video_url.split('v=')[-1]
+            video_id = video_url.split('v=')[1].split('&')[0]
         elif 'youtu.be' in video_url:
-            video_id = video_url.split('/')[-1]
-        else:
-            return "Invalid YouTube URL"
+            video_id = video_url.split('/')[-1].split('&')[0]
 
-        # Get transcript
+        print(f"Video ID: {video_id}")
+        
+        # Get list of available transcripts
+        try:
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            print("Available transcripts:", transcript_list.get_available_transcripts())
+        except Exception as e:
+            print(f"Error listing transcripts: {type(e).__name__}: {str(e)}")
+
+        # Original code continues...
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        print("Successfully got transcript")
+        return " ".join([item['text'] for item in transcript])
 
-        # Combine transcript into a single string
-        captions = " ".join([item['text'] for item in transcript])
-        return captions
-    except TranscriptsDisabled:
-        raise ValueError("This video does not have captions enabled.")
-    except VideoUnavailable:
-        raise ValueError("This video is unavailable.")
     except Exception as e:
-        raise ValueError(f"An error occurred: {e}")
+        print(f"Final error: {type(e).__name__}: {str(e)}")
+        raise
 
 
 
