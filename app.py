@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, jsonify
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, VideoUnavailable
 from youtube_transcript_api._errors import TranscriptsDisabled, VideoUnavailable
 from openai import OpenAI
 import os
+import requests
 import yt_dlp
 from dotenv import load_dotenv
 #from flask_sqlalchemy import SQLAlchemy
@@ -32,62 +33,45 @@ with app.app_context():
     db.create_all()
 
 
-
-import yt_dlp
-from youtube_transcript_api import YouTubeTranscriptApi, YouTubeTranscriptApiException
-
 def fetch_captions(video_url):
-    try:
-        # Define yt-dlp options
-        ydl_opts = {
-            'writesubtitles': True,
-            'writeautomaticsub': True,
-            'skip_download': True,
-            'cookiesfrombrowser': ('chrome',),  
-            'no_warnings': True,
-            'quiet': True
-        }
-        
-        # Attempt to fetch subtitles using yt-dlp
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info_dict = ydl.extract_info(video_url, download=False)
-                if 'requested_subtitles' in info_dict:
-                    subtitle_url = info_dict['requested_subtitles'].get('en', {}).get('url')
-                    if subtitle_url:
-                        # Process and return the subtitle
-                        subtitle = ydl.urlopen(subtitle_url).read().decode('utf-8')
-                        return subtitle
-        except Exception as e:
-            print(f"yt-dlp failed: {str(e)}")
-
-        # Fallback to youtube-transcript-api if yt-dlp fails or subtitles are unavailable
-        return get_transcript_with_original_api(video_url)
-
-    except Exception as e:
-        print(f"Error fetching captions: {str(e)}")
-        raise ValueError(f"Unable to fetch captions: {str(e)}")
-
-def get_transcript_with_original_api(video_url):
     try:
         # Extract video ID from URL
         if 'v=' in video_url:
-            video_id = video_url.split('v=')[1].split('&')[0]
+            video_id = video_url.split('v=')[-1]
+        elif 'youtu.be' in video_url:
+            video_id = video_url.split('/')[-1]
         else:
-            video_id = video_url.split('/')[-1].split('&')[0]
+            return "Invalid YouTube URL"
 
-        # Try fetching transcript using youtube-transcript-api
+        # Set custom headers to mimic a real browser request
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Origin': 'https://www.youtube.com',
+            'Referer': 'https://www.youtube.com/'
+        }
+
+        # Add headers to the API request (using requests library)
+        response = requests.get(f'https://www.youtube.com/watch?v={video_id}', headers=headers)
+        
+        # Check if the response is successful and contains valid data
+        if response.status_code != 200:
+            raise ValueError(f"Failed to access video. Status code: {response.status_code}")
+
+        # Get transcript using youtube-transcript-api
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        return " ".join([item['text'] for item in transcript])
-    
-    except YouTubeTranscriptApiException as e:
-        # Handle specific exceptions for youtube-transcript-api
-        if e.error_code == 404:
-            return "Transcript not available for this video."
-        else:
-            print(f"Failed to fetch transcript: {str(e)}")
-            raise ValueError(f"Unable to fetch transcript: {str(e)}")
+        print("Successfully got transcript")
 
+        # Combine transcript into a single string
+        captions = " ".join([item['text'] for item in transcript])
+        return captions
+    except TranscriptsDisabled:
+        raise ValueError("This video does not have captions enabled.")
+    except VideoUnavailable:
+        raise ValueError("This video is unavailable.")
+    except Exception as e:
+        raise ValueError(f"An error occurred: {e}")
 
 
 def summarize_text(text):
